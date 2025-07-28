@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBD Naia 🎉</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-yellow: #F6D743;
+            --light-yellow-bg: #FEF9E7;
+            --medium-yellow: #F9E79F;
+            --dark-yellow-text: #B7950B;
+            --darker-yellow-text: #6E5B0B;
+            --border-yellow: #F8C471;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+            touch-action: none;
+            background-color: var(--light-yellow-bg); 
+        }
+        #source-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            min-height: 120px;
+            background-color: var(--medium-yellow); 
+            border-radius: 0.5rem;
+        }
+        #target-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+            border: 2px solid var(--main-yellow); 
+            background-color: var(--light-yellow-bg); 
+        }
+        .puzzle-piece {
+            background-size: 300% 300%;
+            cursor: grab;
+            user-select: none;
+            aspect-ratio: 1 / 1;
+            width: 100px; 
+            height: 100px;
+            background-image: url('nailong.jpeg');
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .puzzle-piece.dragging {
+            cursor: grabbing;
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+        .target-slot {
+            aspect-ratio: 1 / 1;
+            background-color: var(--light-yellow-bg); 
+            border: 1px dashed var(--border-yellow); 
+            transition: background-color 0.2s ease;
+        }
+        .target-slot.drag-over {
+            background-color: var(--medium-yellow); 
+            border-style: solid;
+        }
+        .target-slot.placed {
+            border: none;
+            background-size: 300% 300%;
+            background-image: url('nailong.jpeg');
+        }
+        .p-0 { background-position: 0% 0%; }
+        .p-1 { background-position: 50% 0%; }
+        .p-2 { background-position: 100% 0%; }
+        .p-3 { background-position: 0% 50%; }
+        .p-4 { background-position: 50% 50%; }
+        .p-5 { background-position: 100% 50%; }
+        .p-6 { background-position: 0% 100%; }
+        .p-7 { background-position: 50% 100%; }
+        .p-8 { background-position: 100% 100%; }
+    </style>
+</head>
+<body class="bg-yellow-100 text-gray-800 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="text-center mb-4">
+        <h1 class="text-3xl md:text-4xl font-bold" style="color: var(--dark-yellow-text);">Selesaiin Puzzle Ini Buat Dapet Hadiahnya</h1>
+        <p class="mt-1" style="color: var(--darker-yellow-text);">Ambil potongan gambarnya terus taruh diatasnya</p>
+    </div>
+
+    <div id="target-board" class="w-full max-w-sm md:max-w-md lg:max-w-lg rounded-lg shadow-lg mb-6">
+    </div>
+
+    <div id="source-container" class="w-full max-w-sm md:max-w-md lg:max-w-lg shadow-inner"></div>
+
+    <div class="mt-6">
+        <a href="puzzle1.html" class="inline-block font-bold py-3 px-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4" style="background-color: var(--main-yellow); color: var(--darker-yellow-text); border: 1px solid var(--darker-yellow-text);">
+            Ganti Mode
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sourceContainer = document.getElementById('source-container');
+            const targetBoard = document.getElementById('target-board');
+
+            const pieceCount = 9;
+            let placedPieces = 0;
+            
+            let draggedPieceMobile = null;
+            let ghostPiece = null;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            function initializeGame() {
+                placedPieces = 0;
+                sourceContainer.innerHTML = '';
+                targetBoard.innerHTML = '';
+
+                let piecesOrder = Array.from({ length: pieceCount }, (_, i) => i).sort(() => Math.random() - 0.5);
+
+                piecesOrder.forEach(order => {
+                    const piece = document.createElement('div');
+                    piece.classList.add('puzzle-piece', `p-${order}`);
+                    piece.draggable = true;
+                    piece.dataset.value = order;
+                    piece.addEventListener('dragstart', onDragStart);
+                    piece.addEventListener('dragend', onDragEnd);
+                    piece.addEventListener('touchstart', onTouchStart, { passive: false });
+                    sourceContainer.appendChild(piece);
+                });
+
+                for (let i = 0; i < pieceCount; i++) {
+                    const slot = document.createElement('div');
+                    slot.classList.add('target-slot');
+                    slot.dataset.value = i;
+                    slot.addEventListener('dragover', onDragOver);
+                    slot.addEventListener('drop', onDrop);
+                    targetBoard.appendChild(slot);
+                }
+                
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            }
+
+            function onDragStart(event) {
+                event.dataTransfer.setData('text/plain', event.target.dataset.value);
+                setTimeout(() => event.target.classList.add('dragging'), 0);
+            }
+
+            function onDragEnd(event) {
+                event.target.classList.remove('dragging');
+            }
+
+            function onDragOver(event) {
+                event.preventDefault();
+            }
+
+            function onDrop(event) {
+                event.preventDefault();
+                const draggedPieceValue = event.dataTransfer.getData('text/plain');
+                const targetSlot = event.target;
+                placePiece(draggedPieceValue, targetSlot);
+            }
+
+            function onTouchStart(event) {
+                if (event.target.classList.contains('puzzle-piece')) {
+                    event.preventDefault();
+                    draggedPieceMobile = event.target;
+                    
+                    ghostPiece = draggedPieceMobile.cloneNode();
+                    ghostPiece.style.position = 'absolute';
+                    ghostPiece.style.pointerEvents = 'none';
+                    ghostPiece.style.zIndex = '1000';
+                    document.body.appendChild(ghostPiece);
+
+                    const touch = event.touches[0];
+                    const rect = draggedPieceMobile.getBoundingClientRect();
+                    offsetX = touch.clientX - rect.left;
+                    offsetY = touch.clientY - rect.top;
+                    
+                    ghostPiece.style.width = `${rect.width}px`;
+                    ghostPiece.style.height = `${rect.height}px`;
+                    ghostPiece.style.left = `${touch.clientX - offsetX}px`;
+                    ghostPiece.style.top = `${touch.clientY - offsetY}px`;
+                    
+                    draggedPieceMobile.classList.add('dragging');
+                }
+            }
+
+            function onTouchMove(event) {
+                if (draggedPieceMobile) {
+                    event.preventDefault();
+                    const touch = event.touches[0];
+                    ghostPiece.style.left = `${touch.clientX - offsetX}px`;
+                    ghostPiece.style.top = `${touch.clientY - offsetY}px`;
+                    
+                    ghostPiece.style.display = 'none';
+                    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                    ghostPiece.style.display = '';
+                    
+                    document.querySelectorAll('.target-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+                    
+                    if (elementBelow && elementBelow.classList.contains('target-slot')) {
+                        elementBelow.classList.add('drag-over');
+                    }
+                }
+            }
+
+            function onTouchEnd(event) {
+                if (draggedPieceMobile) {
+                    const touch = event.changedTouches[0];
+                    
+                    ghostPiece.style.display = 'none';
+                    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                    document.body.removeChild(ghostPiece);
+                    
+                    document.querySelectorAll('.target-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+
+                    if (elementBelow && elementBelow.classList.contains('target-slot')) {
+                        placePiece(draggedPieceMobile.dataset.value, elementBelow);
+                    }
+                    
+                    draggedPieceMobile.classList.remove('dragging');
+                    draggedPieceMobile = null;
+                    ghostPiece = null;
+                }
+            }
+            
+            function placePiece(pieceValue, targetSlot) {
+                if (pieceValue === targetSlot.dataset.value && !targetSlot.classList.contains('placed')) {
+                    const pieceElement = sourceContainer.querySelector(`[data-value='${pieceValue}']`) || document.querySelector(`[data-value='${pieceValue}']`);
+                    
+                    targetSlot.classList.add('placed', `p-${pieceValue}`);
+                    if(pieceElement && pieceElement.parentElement === sourceContainer) {
+                       pieceElement.remove();
+                    }
+
+                    placedPieces++;
+                    checkWinCondition();
+                }
+            }
+
+            function checkWinCondition() {
+                if (placedPieces === pieceCount) {
+                     // Placeholder
+                    window.location.href = 'hadiah.html'; 
+                }
+            }
+
+            initializeGame();
+        });
+    </script>
+</body>
+</html>

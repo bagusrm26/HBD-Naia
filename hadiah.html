@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBD Naia 🎉</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(120deg, #fcf3cb 0%, #fcfae4 100%); 
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            overflow: hidden;
+            margin: 0;
+            perspective: 1000px;
+        }
+
+        .wa-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #F6D743;
+            color: #451a03;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .wa-button:hover {
+            background-color: #F6D743;
+            transform: scale(1.05);
+        }        
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .gift-box {
+            position: relative;
+            width: 75vw; 
+            max-width: 280px; 
+            height: 67vw; 
+            max-height: 250px; 
+            cursor: pointer;
+            transition: transform 0.5s, opacity 0.5s 0.5s;
+        }
+        
+        .gift-box:hover .gift-lid {
+            transform: translateY(-10px) translateX(-50%);
+        }
+
+        .gift-body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+        }
+
+        .gift-lid {
+            position: absolute;
+            top: -8%; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            z-index: 1;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        .gift-box.open .gift-lid {
+            transform: translateY(-250px) translateX(-50%) rotate(15deg);
+        }
+        
+        .gift-box.open {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .scrapbook {
+            display: none; 
+            width: 85vw;
+            max-width: 600px;
+            padding: 30px;
+            background-color: #fffde7; 
+            border: 15px solid #ffcc80; 
+            border-image: repeating-linear-gradient(45deg, #f4e58f, #f4ed8f 10px, #ffffff 10px, #ffffff 20px) 20;
+            border-radius: 5px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            text-align: center;
+            animation: fadeInScale 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .scrapbook h1 {
+            color: #c2185b;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .scrapbook p {
+            color: #6d4c41;
+            font-size: 1.3em;
+            line-height: 1.7;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .click-message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #65c218;
+            animation: bounce 2s infinite;
+            transition: opacity 0.5s;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .confetti {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background: #f06;
+            top: -50px;
+            opacity: 0;
+        }
+
+        @media (max-width: 480px) {
+            .scrapbook {
+                padding: 15px; 
+                width: 85vw;   
+                border-width: 8px; 
+            }
+            .scrapbook h1 {
+                font-size: 1.6em; 
+            }
+            .scrapbook p {
+                font-size: 0.95em; 
+                line-height: 1.6;
+            }
+            .click-message {
+                font-size: 1.2em;
+            }
+            .gift-box.open .gift-lid {
+                transform: translateY(-180px) translateX(-50%) rotate(15deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<audio id="confettiSound" src="confetti.mp3" preload="auto"></audio>
+<audio id="birthdayMusic" src="happybirthday.mp3" preload="auto" loop></audio>
+
+<div class="confetti" id="confetti-container"></div>
+
+<div class="container" id="main-container">
+    <div class="gift-box" id="giftBox">
+        <img src="badan.png" alt="badan" class="gift-body">
+        <img src="tutup.png" alt="tutup" class="gift-lid">
+    </div>
+    
+    <div class="click-message" id="clickMessage">
+        Klik kadonya nai
+    </div>
+</div>
+
+<div class="scrapbook" id="scrapbookContent">
+    <h1>🎉Happy Birthday Naiaaaa🎉</h1>
+    <p>
+        Hai naiaaa yang cantik, imut, manis, baik, dan tidak sombong aku mau ucapin selamat ulang tahun buat kamuuu ke 18
+        moga panjang umurrr sehat selaluuu, semua yang diinginkan tercapai termasuk jadi MUA terkenallll, semoga besok lulus 
+        dengan nilai yang baikkk, semoga rasa sukanya makin banyak ke aku hehe candaaaa, yang terbaik buat kamu
+        jangan pernah bosen juga sama akuuuuu yakkkk, maap yakkk aku baru bisa ngasih iniii hehe moga suka yakk
+        <br><br>
+        Love youuuuuu
+        <br>
+        Klik tombol dibawah kalo pengen ngucapin makasi, kalo kamu mau ke wa kalo engga langsung ke dm ig aja
+        <br>
+        <button class="wa-button" onclick="sendMessage()">Kirim Pesan</button>    
+    </p>
+</div>
+
+<script>
+    const giftBox = document.getElementById('giftBox');
+    const scrapbookContent = document.getElementById('scrapbookContent');
+    const clickMessage = document.getElementById('clickMessage');
+    const mainContainer = document.getElementById('main-container');
+    const confettiContainer = document.getElementById('confetti-container');
+
+    giftBox.addEventListener('click', () => {
+        giftBox.classList.add('open');
+        clickMessage.style.opacity = '0'; 
+        document.getElementById('confettiSound').play();
+        document.getElementById('birthdayMusic').play();
+        launchConfetti();
+
+        setTimeout(() => {
+            mainContainer.style.display = 'none'; 
+            scrapbookContent.style.display = 'block'; 
+        }, 1000);
+    });
+
+    function launchConfetti() {
+        confettiContainer.style.display = 'block';
+        const colors = ['#e91e63', '#fce4ec', '#ffc107', '#4caf50', '#2196f3'];
+        for (let i = 0; i < 100; i++) {
+            const confettiPiece = document.createElement('div');
+            confettiPiece.classList.add('confetti-piece');
+            confettiPiece.style.left = Math.random() * 100 + 'vw';
+            confettiPiece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confettiPiece.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+            confettiContainer.appendChild(confettiPiece);
+
+            animateConfettiPiece(confettiPiece);
+        }
+    }
+
+    function animateConfettiPiece(piece) {
+        const duration = Math.random() * 3 + 2; // Durasi jatuh 2-5 detik
+        const delay = Math.random() * 1;
+        piece.style.animation = `fall ${duration}s linear ${delay}s forwards`;
+    }
+    
+    // Menambahkan keyframes untuk animasi confetti secara dinamis
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = `
+        @keyframes fall {
+            from {
+                top: -20px;
+                opacity: 1;
+            }
+            to {
+                top: 105vh;
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    function sendMessage() {
+        const phoneNumber = '6289618408451'; // ganti dengan nomor tujuan
+        const message = encodeURIComponent('Makasiiii sayang');
+        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    }
+
+</script>
+
+</body>
+</html>
